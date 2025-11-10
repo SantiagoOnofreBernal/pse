@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${title}">Encuesta</title>
+    <style>
+        .hidden { display: none; }
+        .visible { display: inline-block; }
+        .field { margin: 8px 0; }
+        input.visible, select.visible { min-width: 200px; }
+    </style>
+</head>
+<body>
+    <h1 th:text="${title}">Encuesta</h1>
+
+    <form method="post" th:action="@{/encuesta/{id}(id=${surveyId})}">
+        <input type="hidden" name="surveyId" th:value="${surveyId}" />
+
+        <ul>
+            <li th:each="q : ${questions}" class="field">
+                <label th:text="${q.label}">Etiqueta</label>
+                <br/>
+
+                <!--SANTIAGO GAY-->
+                <input type="text"
+                       th:name="${#strings.replace(q.label,' ','_') + '_text'}"
+                       th:class="${q.inputClass}" />
+
+         
+                <select th:name="${#strings.replace(q.label,' ','_') + '_select'}"
+                        th:class="${q.selectClass}">
+                    <option value="" disabled selected>-- Seleccione --</option>
+                    <option th:each="opt : ${q.options}" th:text="${opt}" th:value="${opt}">Opción</option>
+                </select>
+            </li>
+        </ul>
+
+        <button type="submit">Enviar</button>
+    </form>
+
+    <p>
+        Ir a:
+        <a th:href="@{/encuesta/1}">/1</a> |
+        <a th:href="@{/encuesta/2}">/2</a> |
+        <a th:href="@{/encuesta/3}">/3</a>
+    </p>
+</body>
+</html>
