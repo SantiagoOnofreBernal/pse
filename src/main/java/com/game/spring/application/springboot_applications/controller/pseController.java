@@ -1,19 +1,24 @@
 package com.game.spring.application.springboot_applications.controller;
 
-import com.game.spring.application.springboot_applications.model.pago;
-import com.game.spring.application.springboot_applications.service.PagoService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.game.spring.application.springboot_applications.model.pago;
+import com.game.spring.application.springboot_applications.service.PagoService;
+import com.game.spring.application.springboot_applications.service.QRService;
 
 @Controller
 @RequestMapping("/pse")
@@ -28,34 +33,39 @@ public class pseController {
         return "pse_form";
     }
 
-    @PostMapping("/procesar")
-    public String procesarPago(
-            @RequestParam String banco,
-            @RequestParam double valor,
-            @RequestParam String referencia,
-            Model model) {
+    @Autowired
+    private QRService qrService;
+@PostMapping("/procesar")
+public String procesarPago(
+        @RequestParam String banco,
+        @RequestParam double valor,
+        @RequestParam String referencia,
+        Model model) {
 
-        boolean aprobado = valor > 0 && valor <= 1000000; 
-        String codigo = "PSE-" + (int)(Math.random() * 900000 + 100000);
-        LocalDateTime fecha = LocalDateTime.now();
-        String fechaStr = fecha.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
+    boolean aprobado = valor > 0 && valor <= 1000000; 
+    String codigo = "PSE-" + (int)(Math.random() * 900000 + 100000);
+    LocalDateTime fecha = LocalDateTime.now();
+    String fechaStr = fecha.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
 
-        // crear objeto Pago y guardarlo en servicio
-        pago pago = new pago(codigo, banco, valor, referencia, fecha, aprobado);
-        pagoService.registrarPago(pago);
+    pago pago = new pago(codigo, banco, valor, referencia, fecha, aprobado);
+    pagoService.registrarPago(pago);
 
-        model.addAttribute("banco", banco);
-        model.addAttribute("valor", valor);
-        model.addAttribute("referencia", referencia);
-        model.addAttribute("fecha", fechaStr);
-        model.addAttribute("codigo", codigo);
-        model.addAttribute("resultado", aprobado ? "PAGO EXITOSO ✅" : "ERROR EN EL PAGO ❌");
-        model.addAttribute("exitoso", aprobado);
+    // Generar QR
+    String qrData = String.format("Código: %s | Banco: %s | Valor: $%.0f | Fecha: %s", 
+        codigo, banco, valor, fechaStr);
+    String qrBase64 = qrService.generarQRBase64(qrData);
 
-        
-        return "pse_comprobante";
+    model.addAttribute("banco", banco);
+    model.addAttribute("valor", String.format("%.0f", valor));
+    model.addAttribute("referencia", referencia);
+    model.addAttribute("fecha", fechaStr);
+    model.addAttribute("codigo", codigo);
+    model.addAttribute("resultado", aprobado ? "PAGO EXITOSO ✅" : "ERROR EN EL PAGO ❌");
+    model.addAttribute("exitoso", aprobado);
+    model.addAttribute("qrImage", qrBase64); // QR en base64
+
+    return "pse_comprobante";
     }
-
     @GetMapping("/historial")
 public String historial(Model model) {
     List<pago> pagos = pagoService.listarPagos();

@@ -4,46 +4,342 @@
     <meta charset="UTF-8">
     <title>Historial de Pagos PSE</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #f8fafc; font-family: 'Segoe UI', sans-serif; }
-        .table-wrap { max-width: 1000px; margin: 2rem auto; }
+        :root {
+            --pse-primary: #00468C;
+            --pse-secondary: #0066CC;
+            --pse-success: #00A651;
+        }
+        
+        body { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            padding: 2rem 1rem;
+        }
+        
+        .historial-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .historial-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .historial-header {
+            background: linear-gradient(135deg, #00468C 0%, #0066CC 100%);
+            padding: 2rem 2.5rem;
+            color: white;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .header-title i {
+            font-size: 2rem;
+        }
+        
+        .header-title h3 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.8rem;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .btn-header {
+            padding: 0.65rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .btn-export {
+            background: white;
+            color: var(--pse-primary);
+        }
+        
+        .btn-export:hover {
+            background: #f8fafc;
+            transform: translateY(-2px);
+        }
+        
+        .btn-nuevo-pago {
+            background: var(--pse-success);
+            color: white;
+        }
+        
+        .btn-nuevo-pago:hover {
+            background: #008c43;
+            transform: translateY(-2px);
+        }
+        
+        .historial-body {
+            padding: 2.5rem;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .table-custom {
+            margin: 0;
+            background: white;
+        }
+        
+        .table-custom thead {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+        
+        .table-custom th {
+            font-weight: 600;
+            color: #334155;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            padding: 1.2rem 1rem;
+            border: none;
+            white-space: nowrap;
+        }
+        
+        .table-custom tbody tr {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .table-custom tbody tr:hover {
+            background: #f8fafc;
+            transform: scale(1.01);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .table-custom td {
+            padding: 1.2rem 1rem;
+            vertical-align: middle;
+            color: #475569;
+            border: none;
+        }
+        
+        .codigo-cell {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: var(--pse-primary);
+            font-size: 0.9rem;
+        }
+        
+        .banco-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .banco-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--pse-primary);
+        }
+        
+        .valor-cell {
+            font-weight: 700;
+            color: #059669;
+            font-size: 1.05rem;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-badge.exitoso {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-badge.fallido {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #64748b;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+        }
+        
+        .empty-state h5 {
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 0.5rem;
+        }
+        
+        .empty-state p {
+            margin-bottom: 1.5rem;
+        }
+        
+        .empty-state .btn {
+            background: linear-gradient(135deg, #00468C 0%, #0066CC 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .historial-body {
+                padding: 1.5rem;
+            }
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .header-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+            .btn-header {
+                width: 100%;
+                justify-content: center;
+            }
+            .table-custom {
+                font-size: 0.9rem;
+            }
+            .table-custom th,
+            .table-custom td {
+                padding: 0.8rem 0.5rem;
+            }
+        }
     </style>
 </head>
 <body>
-<div class="table-wrap">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>Historial de Pagos (Simulado)</h3>
-        <div>
-            <a th:href="@{/pse/export}" class="btn btn-outline-primary">Exportar CSV</a>
-            <a th:href="@{/pse/form}" class="btn btn-primary">Nuevo Pago</a>
+
+<div class="historial-container">
+    <div class="historial-card">
+        <div class="historial-header">
+            <div class="header-content">
+                <div class="header-title">
+                    <i class="fas fa-history"></i>
+                    <h3>Historial de Pagos</h3>
+                </div>
+                <div class="header-actions">
+                    <a th:href="@{/pse/export}" class="btn btn-header btn-export">
+                        <i class="fas fa-file-csv"></i>
+                        Exportar CSV
+                    </a>
+                    <a th:href="@{/pse/form}" class="btn btn-header btn-nuevo-pago">
+                        <i class="fas fa-plus-circle"></i>
+                        Nuevo Pago
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="historial-body">
+            <div class="table-container" th:if="${pagos.size()} > 0">
+                <table class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-barcode me-1"></i> Código</th>
+                            <th><i class="fas fa-university me-1"></i> Banco</th>
+                            <th><i class="fas fa-hashtag me-1"></i> Referencia</th>
+                            <th><i class="fas fa-dollar-sign me-1"></i> Valor</th>
+                            <th><i class="fas fa-calendar me-1"></i> Fecha</th>
+                            <th><i class="fas fa-check-circle me-1"></i> Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="pago : ${pagos}">
+                            <td class="codigo-cell" th:text="${pago.codigo}">PSE-2024-001</td>
+                            <td>
+                                <div class="banco-cell">
+                                    <div class="banco-icon">
+                                        <i class="fas fa-university"></i>
+                                    </div>
+                                    <span th:text="${pago.banco}">Bancolombia</span>
+                                </div>
+                            </td>
+                            <td th:text="${pago.referencia}">FACTURA-123</td>
+                            <td class="valor-cell">
+                                $<span th:text="${#numbers.formatDecimal(pago.valor, 0, 'COMMA', 2, 'POINT')}">50,000.00</span>
+                            </td>
+                            <td th:text="${#temporals.format(pago.fecha, 'dd/MM/yyyy HH:mm')}">20/11/2025 14:30</td>
+                            <td>
+                                <span class="status-badge" 
+                                      th:classappend="${pago.exitoso} ? 'exitoso' : 'fallido'"
+                                      th:text="${pago.exitoso} ? 'Exitoso' : 'Fallido'">
+                                    Exitoso
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="empty-state" th:if="${pagos.size()} == 0">
+                <i class="fas fa-inbox"></i>
+                <h5>No hay transacciones registradas</h5>
+                <p>Aún no has realizado ningún pago a través de PSE</p>
+                <a th:href="@{/pse/form}" class="btn">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    Realizar tu primer pago
+                </a>
+            </div>
         </div>
     </div>
-
-    <table class="table table-striped table-bordered">
-        <thead class="table-light">
-            <tr>
-                <th>Código</th>
-                <th>Banco</th>
-                <th>Referencia</th>
-                <th>Valor</th>
-                <th>Fecha</th>
-                <th>Exitoso</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="pago : ${pagos}">
-                <td th:text="${pago.codigo}"></td>
-                <td th:text="${pago.banco}"></td>
-                <td th:text="${pago.referencia}"></td>
-                <td th:text="${#numbers.formatDecimal(pago.valor, 0, 'COMMA', 2, 'POINT')}"></td>
-                <td th:text="${#temporals.format(pago.fecha, 'dd/MM/yyyy HH:mm:ss')}"></td>
-                <td th:text="${pago.exitoso} ? 'SI' : 'NO'"></td>
-            </tr>
-            <tr th:if="${pagos.size()} == 0">
-                <td colspan="6" class="text-center text-muted">No hay pagos registrados aún.</td>
-            </tr>
-        </tbody>
-    </table>
 </div>
+
 </body>
 </html>
