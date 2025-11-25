@@ -1,8 +1,15 @@
 package com.game.spring.application.springboot_applications.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-public class pago {
+@Entity
+@Table(name = "pagos")
+public class Pago{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String codigo;
     private String banco;
     private double valor;
@@ -10,9 +17,9 @@ public class pago {
     private LocalDateTime fecha;
     private boolean exitoso;
 
-    public pago() {}
+    public Pago() {}
 
-    public pago(String codigo, String banco, double valor, String referencia, LocalDateTime fecha, boolean exitoso) {
+    public Pago(String codigo, String banco, double valor, String referencia, LocalDateTime fecha, boolean exitoso) {
         this.codigo = codigo;
         this.banco = banco;
         this.valor = valor;

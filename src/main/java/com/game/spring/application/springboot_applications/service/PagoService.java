@@ -1,26 +1,22 @@
 package com.game.spring.application.springboot_applications.service;
 
-import com.game.spring.application.springboot_applications.model.pago;
+import com.game.spring.application.springboot_applications.model.Pago;
+import com.game.spring.application.springboot_applications.repository.PagoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
 public class PagoService {
 
+    @Autowired
+    private PagoRepository pagoRepository;
 
-    private final List<pago> pagos = new CopyOnWriteArrayList<>();
-
-    public void registrarPago(pago pago) {
-        pagos.add(0, pago); 
+    public void registrarPago(Pago pago) {
+        pagoRepository.save(pago);
     }
 
-    public List<pago> listarPagos() {
-        return pagos;
-    }
-
-    public void clearAll() {
-        pagos.clear();
+    public List<Pago> listarPagos() {
+        return pagoRepository.findAll();
     }
 }
